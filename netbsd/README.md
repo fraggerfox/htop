@@ -11,7 +11,6 @@ Make NetBSD no longer masquerade as Linux.
 Build notes
 ---
 
-* Comment out `#include <sys/user.h>` in NetBSD-9 and above. (if building there)
 * Make sure python interpreter is correct in `scripts/MakeHeader.py`
 
 What works

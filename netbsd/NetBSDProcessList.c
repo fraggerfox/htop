@@ -21,7 +21,6 @@ in the source distribution for its full text.
 #include <sys/resource.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
-#include <sys/user.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
