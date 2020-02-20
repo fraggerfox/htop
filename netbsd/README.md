@@ -41,3 +41,4 @@ TODO
 * Use kvm_getlwps(3) to get thread information
 * Implement / fix proper Memory usage display
 * Make package in pkgsrc-wip for better testing
+* Fix the `kproc->p_stat` switch...case with correct values
