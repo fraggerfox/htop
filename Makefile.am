@@ -99,6 +99,27 @@ dragonflybsd/DragonFlyBSDProcess.c dragonflybsd/DragonFlyBSDCRT.c dragonflybsd/B
 myhtopplatheaders = $(dragonflybsd_platform_headers)
 endif
 
+# NetBSD
+# -------
+
+netbsd_platform_headers = \
+	netbsd/Platform.h \
+	netbsd/NetBSDProcessList.h \
+	netbsd/NetBSDProcess.h \
+	netbsd/NetBSDCRT.h \
+	netbsd/Battery.h
+
+all_platform_headers += $(netbsd_platform_headers)
+
+if HTOP_NETBSD
+AM_LDFLAGS += -lkvm
+myhtopplatsources = netbsd/Platform.c netbsd/NetBSDProcessList.c \
+netbsd/NetBSDProcess.c netbsd/NetBSDCRT.c netbsd/Battery.c
+
+
+myhtopplatheaders = $(netbsd_platform_headers)
+endif
+
 # OpenBSD
 # -------
 

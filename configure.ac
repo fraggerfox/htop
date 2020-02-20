@@ -34,6 +34,9 @@ linux*|gnu*)
 freebsd*|kfreebsd*)
    my_htop_platform=freebsd
    ;;
+netbsd*)
+   my_htop_platform=netbsd
+   ;;
 openbsd*)
    my_htop_platform=openbsd
    ;;
@@ -226,7 +229,7 @@ else
       HTOP_CHECK_LIB([ncurses],  [refresh], [HAVE_LIBNCURSES],
       missing_libraries="$missing_libraries libncurses"
    ))))
-   
+
    AC_CHECK_HEADERS([curses.h],[:],
       [AC_CHECK_HEADERS([ncurses/curses.h],[:],
          [AC_CHECK_HEADERS([ncurses/ncurses.h],[:],
@@ -315,6 +318,7 @@ AC_DEFINE_UNQUOTED(COPYRIGHT, "(C) 2004-$year Hisham Muhammad", [Copyright messa
 AM_CONDITIONAL([HTOP_LINUX], [test "$my_htop_platform" = linux])
 AM_CONDITIONAL([HTOP_FREEBSD], [test "$my_htop_platform" = freebsd])
 AM_CONDITIONAL([HTOP_DRAGONFLYBSD], [test "$my_htop_platform" = dragonflybsd])
+AM_CONDITIONAL([HTOP_NETBSD], [test "$my_htop_platform" = netbsd])
 AM_CONDITIONAL([HTOP_OPENBSD], [test "$my_htop_platform" = openbsd])
 AM_CONDITIONAL([HTOP_DARWIN], [test "$my_htop_platform" = darwin])
 AM_CONDITIONAL([HTOP_SOLARIS], [test "$my_htop_platform" = solaris])
