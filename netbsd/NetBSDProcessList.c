@@ -152,8 +152,8 @@ static inline void NetBSDProcessList_scanMemoryInfo(ProcessList* pl) {
 //   pl->cachedMem = bcstats.numbufpages * PAGE_SIZE_KB;
    pl->freeMem = uvmexp.free * PAGE_SIZE_KB;
    pl->usedMem = (uvmexp.npages - uvmexp.free - uvmexp.paging) * PAGE_SIZE_KB;
-
-
+   //pl->buffersMem = uvmexp.free * PAGE_SIZE_KB;
+   pl->cachedMem = (uvmexp.anonpages + uvmexp.filepages + uvmexp.execpages) * PAGE_SIZE_KB;
 //   const NetBSDProcessList* opl = (NetBSDProcessList*) pl;
 
 //   size_t len = sizeof(pl->totalMem);
