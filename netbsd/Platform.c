@@ -51,6 +51,8 @@ extern ProcessFieldData Process_fields[];
 
 }*/
 
+#define isnan(x) (x > 100) ? 100.0 : x
+
 #define MAXCPU 256
 // XXX: probably should be a struct member
 static int64_t old_v[MAXCPU][5];

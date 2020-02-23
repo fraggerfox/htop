@@ -60,11 +60,6 @@ typedef struct NetBSDProcessList_ {
 #define CLAMP(x, low, high)	(((x) > (high)) ? (high) : MAXIMUM(x, low))
 #endif
 
-#define BOUNDS(x) isnan(x) ? 0.0 : (x > 100) ? 100.0 : x;
-
-static int MIB_hw_physmem[2];
-static int MIB_vm_stats_vm_v_page_count[4];
-
 static long fscale;
 
 ProcessList* ProcessList_new(UsersTable* usersTable, Hashtable* pidWhiteList, uid_t userId) {
@@ -129,56 +124,15 @@ static inline void NetBSDProcessList_scanMemoryInfo(ProcessList* pl) {
 
    pl->totalMem = uvmexp.npages * PAGE_SIZE_KB;
 
-//   FILE *fp;
-//   fp = fopen("debug.log", "w");
-//   fprintf(fp,"npages %lu\n", uvmexp.npages);
-//   fprintf(fp,"free %lu\n", uvmexp.free);
-//   fprintf(fp,"wired %lu\n", uvmexp.wired);
-//   fprintf(fp,"active %lu\n", uvmexp.active);
-//   fprintf(fp,"inactive %lu\n", uvmexp.inactive);
-//   fprintf(fp,"paging %lu\n", uvmexp.paging);
-//   fprintf(fp,"pagesize %lu\n", uvmexp.pagesize);
-//   fprintf(fp, "%lu\n",PAGE_SIZE_KB);
-
-//   // Taken from NetBSD systat/iostat.c, top/machine.c and uvm_sysctl(9)
-//   static int bcache_mib[] = {CTL_VFS, VFS_GENERIC, VFS_BCACHESTAT};
-//   struct bcachestats bcstats;
-//   size_t size_bcstats = sizeof(bcstats);
-//
-//   if (sysctl(bcache_mib, 3, &bcstats, &size_bcstats, NULL, 0) < 0) {
-//      err(1, "cannot get vfs.bcachestat");
-//   }
-
-//   pl->cachedMem = bcstats.numbufpages * PAGE_SIZE_KB;
+   // These calculations have been taken from sys/miscfs/procfs
+   // They need review for testing the correctness
    pl->freeMem = uvmexp.free * PAGE_SIZE_KB;
-   pl->usedMem = (uvmexp.npages - uvmexp.free - uvmexp.paging) * PAGE_SIZE_KB;
-   //pl->buffersMem = uvmexp.free * PAGE_SIZE_KB;
+   pl->buffersMem = uvmexp.free * PAGE_SIZE_KB;
    pl->cachedMem = (uvmexp.anonpages + uvmexp.filepages + uvmexp.execpages) * PAGE_SIZE_KB;
-//   const NetBSDProcessList* opl = (NetBSDProcessList*) pl;
+   pl->usedMem = (uvmexp.npages - uvmexp.free - uvmexp.paging) * PAGE_SIZE_KB + pl->buffersMem + pl->cachedMem;
 
-//   size_t len = sizeof(pl->totalMem);
-//   sysctl(MIB_hw_physmem, 2, &(pl->totalMem), &len, NULL, 0);
-//   pl->totalMem /= 1024;
-//   sysctl(MIB_vm_stats_vm_v_wire_count, 4, &(pl->usedMem), &len, NULL, 0);
-//   pl->usedMem *= PAGE_SIZE_KB;
-//   pl->freeMem = pl->totalMem - pl->usedMem;
-////   sysctl(MIB_vm_stats_vm_v_cache_count, 4, &(pl->cachedMem), &len, NULL, 0);
-////   pl->cachedMem *= PAGE_SIZE_KB;
-//
-////   struct kvm_swap swap[16];
-////   int nswap = kvm_getswapinfo(opl->kd, swap, sizeof(swap)/sizeof(swap[0]), 0);
-//   pl->totalSwap = 0;
-//   pl->usedSwap = 0;
-////   for (int i = 0; i < nswap; i++) {
-////      pl->totalSwap += swap[i].ksw_total;
-////      pl->usedSwap += swap[i].ksw_used;
-////   }
    pl->totalSwap = uvmexp.swpages * PAGE_SIZE_KB;
    pl->usedSwap = uvmexp.swpginuse * PAGE_SIZE_KB;
-//
-//   pl->sharedMem = 0;  // currently unused
-//   pl->buffersMem = 0; // not exposed to userspace
-
 }
 
 char *NetBSDProcessList_readProcessName(kvm_t* kd, struct kinfo_proc2* kproc, int* basenameEnd) {
@@ -239,7 +193,7 @@ void ProcessList_goThroughEntries(ProcessList* this) {
    struct kinfo_proc2* kproc;
    bool preExisting;
    Process* proc;
-   NetBSDProcess* fp;
+   //NetBSDProcess* fp;
    struct tm date;
    struct timeval tv;
    int count = 0;
@@ -248,7 +202,6 @@ void ProcessList_goThroughEntries(ProcessList* this) {
    NetBSDProcessList_scanMemoryInfo(this);
 
    struct kinfo_proc2* kprocs = kvm_getproc2(opl->kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &count);
-   //struct kinfo_proc* kprocs = getprocs(KERN_PROC_ALL, 0, &count);
 
    gettimeofday(&tv, NULL);
 
@@ -257,7 +210,7 @@ void ProcessList_goThroughEntries(ProcessList* this) {
 
       preExisting = false;
       proc = ProcessList_getProcess(this, kproc->p_pid, &preExisting, (Process_New) NetBSDProcess_new);
-      fp = (NetBSDProcess*) proc;
+      //fp = (NetBSDProcess*) proc;
 
       proc->show = ! ((hideKernelThreads && Process_isKernelThread(proc))
 	          || (hideUserlandThreads && Process_isUserlandThread(proc)));
@@ -283,7 +236,7 @@ void ProcessList_goThroughEntries(ProcessList* this) {
 	 }
       }
 
-      proc->m_size = kproc->p_vm_dsize;
+      proc->m_size = kproc->p_vm_vsize;
       proc->m_resident = kproc->p_vm_rssize;
       proc->percent_mem = (proc->m_resident * PAGE_SIZE_KB) / (double)(this->totalMem) * 100.0;
       proc->percent_cpu = CLAMP(getpcpu(kproc), 0.0, this->cpuCount*100.0);
