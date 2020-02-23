@@ -233,10 +233,10 @@ double Platform_setCPUValues(Meter* this, int cpu) {
    }
 
    // Ordering taken from vmstat(1)
-   this->values[0] = v[CP_SYS];
-   this->values[1] = v[CP_USER];
-   this->values[2] = v[CP_NICE];
-   this->values[3] = v[CP_INTR];
+   this->values[CPU_METER_KERNEL] = v[CP_SYS];
+   this->values[CPU_METER_NORMAL] = v[CP_USER];
+   this->values[CPU_METER_NICE] = v[CP_NICE];
+   this->values[CPU_METER_IRQ] = v[CP_INTR];
 
    Meter_setItems(this, 4);
 
