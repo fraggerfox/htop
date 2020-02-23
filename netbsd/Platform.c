@@ -204,12 +204,12 @@ void Platform_getLoadAverage(double* one, double* five, double* fifteen) {
 
 int Platform_getMaxPid() {
    // this is hard-coded in sys/sys/proc.h - no sysctl exists
-   return 32766;
+   return 30000;
 }
 
 double Platform_setCPUValues(Meter* this, int cpu) {
    int i;
-   double perc;
+   double percent;
 
    NetBSDProcessList* pl = (NetBSDProcessList*) this->pl;
    CPUData* cpuData = &(pl->cpus[cpu]);
@@ -232,15 +232,19 @@ double Platform_setCPUValues(Meter* this, int cpu) {
       v[i] = diff_v[i] / 10.;
    }
 
+   // Ordering taken from vmstat(1)
+   this->values[0] = v[CP_SYS];
+   this->values[1] = v[CP_USER];
+   this->values[2] = v[CP_NICE];
+   this->values[3] = v[CP_INTR];
+
    Meter_setItems(this, 4);
 
-   perc = v[0] + v[1] + v[2] + v[3];
+   percent = v[0] + v[1] + v[2] + v[3];
 
-   if (perc <= 100. && perc >= 0.) {
-      return perc;
-   } else {
-      return 0.;
-   }
+   percent = CLAMP(percent, 0.0, 100.0);
+   if (isnan(percent)) percent = 0.0;
+   return percent;
 }
 
 void Platform_setMemoryValues(Meter* this) {
