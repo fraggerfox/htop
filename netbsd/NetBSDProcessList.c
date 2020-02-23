@@ -60,6 +60,8 @@ typedef struct NetBSDProcessList_ {
 #define CLAMP(x, low, high)	(((x) > (high)) ? (high) : MAXIMUM(x, low))
 #endif
 
+#define BOUNDS(x) isnan(x) ? 0.0 : (x > 100) ? 100.0 : x;
+
 static int MIB_hw_physmem[2];
 static int MIB_vm_stats_vm_v_page_count[4];
 

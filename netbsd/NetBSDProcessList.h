@@ -42,6 +42,8 @@ typedef struct NetBSDProcessList_ {
 #define CLAMP(x, low, high)	(((x) > (high)) ? (high) : MAXIMUM(x, low))
 #endif
 
+#define BOUNDS(x) isnan(x) ? 0.0 : (x > 100) ? 100.0 : x;
+
 
 ProcessList* ProcessList_new(UsersTable* usersTable, Hashtable* pidWhiteList, uid_t userId);
 
