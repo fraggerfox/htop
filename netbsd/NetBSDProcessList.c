@@ -217,23 +217,23 @@ void ProcessList_goThroughEntries(ProcessList* this) {
 
       if (!preExisting) {
          proc->ppid = kproc->p_ppid;
-	 proc->tpgid = kproc->p_tpgid;
-	 proc->tgid = kproc->p_pid;
-	 proc->session = kproc->p_sid;
-	 proc->tty_nr = kproc->p_tdev;
-	 proc->pgrp = kproc->p__pgid;
-	 proc->st_uid = kproc->p_uid;
-	 proc->starttime_ctime = kproc->p_ustart_sec;
-	 proc->user = UsersTable_getRef(this->usersTable, proc->st_uid);
-	 ProcessList_add((ProcessList*)this, proc);
-	 proc->comm = NetBSDProcessList_readProcessName(opl->kd, kproc, &proc->basenameOffset);
-	 (void) localtime_r((time_t*) &kproc->p_ustart_sec, &date);
-	 strftime(proc->starttime_show, 7, ((proc->starttime_ctime > tv.tv_sec - 86400) ? "%R " : "%b%d "), &date);
+         proc->tpgid = kproc->p_tpgid;
+         proc->tgid = kproc->p_pid;
+         proc->session = kproc->p_sid;
+         proc->tty_nr = kproc->p_tdev;
+         proc->pgrp = kproc->p__pgid;
+         proc->st_uid = kproc->p_uid;
+         proc->starttime_ctime = kproc->p_ustart_sec;
+         proc->user = UsersTable_getRef(this->usersTable, proc->st_uid);
+         ProcessList_add((ProcessList*)this, proc);
+         proc->comm = NetBSDProcessList_readProcessName(opl->kd, kproc, &proc->basenameOffset);
+         (void) localtime_r((time_t*) &kproc->p_ustart_sec, &date);
+         strftime(proc->starttime_show, 7, ((proc->starttime_ctime > tv.tv_sec - 86400) ? "%R " : "%b%d "), &date);
       } else {
-	 if (settings->updateProcessNames) {
-	   free(proc->comm);
-	   proc->comm = NetBSDProcessList_readProcessName(opl->kd, kproc, &proc->basenameOffset);
-	 }
+         if (settings->updateProcessNames) {
+           free(proc->comm);
+           proc->comm = NetBSDProcessList_readProcessName(opl->kd, kproc, &proc->basenameOffset);
+         }
       }
 
       proc->m_size = kproc->p_vm_vsize;
@@ -259,7 +259,7 @@ void ProcessList_goThroughEntries(ProcessList* this) {
       }
 
       if (Process_isKernelThread(proc)) {
-	this->kernelThreads++;
+        this->kernelThreads++;
       }
 
       this->totalTasks++;
