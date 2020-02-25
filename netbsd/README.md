@@ -24,7 +24,6 @@ What works
 What does *NOT* work
 ---
 
-* Tree view and threads
 * Memory being split into used/buffers/cache
 
 What needs to be tested
