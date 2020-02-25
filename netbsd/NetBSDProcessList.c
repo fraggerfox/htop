@@ -191,13 +191,15 @@ void ProcessList_goThroughEntries(ProcessList* this) {
    bool hideKernelThreads = settings->hideKernelThreads;
    bool hideUserlandThreads = settings->hideUserlandThreads;
    struct kinfo_proc2* kproc;
+   struct kinfo_lwp* klwps;
    bool preExisting;
    Process* proc;
    //NetBSDProcess* fp;
    struct tm date;
    struct timeval tv;
    int count = 0;
-   int i;
+   int nlwps = 0;
+   int i, j;
 
    NetBSDProcessList_scanMemoryInfo(this);
 
@@ -247,15 +249,28 @@ void ProcessList_goThroughEntries(ProcessList* this) {
       proc->time *= 100;
       proc->priority = kproc->p_priority - PZERO;
 
-      switch (kproc->p_stat) {
-         case SIDL:     proc->state = 'I'; break;
-         case LSRUN:    proc->state = 'R'; break;
-         case LSSLEEP:  proc->state = 'S'; break;
-         case SSTOP:    proc->state = 'T'; break;
-         case SZOMB:    proc->state = 'Z'; break;
-         case SDEAD:    proc->state = 'D'; break;
-         case LSONPROC: proc->state = 'P'; break;
-         default:       proc->state = '?';
+      klwps = kvm_getlwps(opl->kd, kproc->p_pid, kproc->p_paddr, sizeof(struct kinfo_lwp), &nlwps);
+
+      proc->nlwp = nlwps;
+
+      switch (kproc->p_realstat) {
+      case SIDL:     proc->state = 'I'; break;
+      case SACTIVE:
+	// We only consider the first LWP with a one of the below states.
+        for(j = 0; j < nlwps; j++) {
+          switch (klwps[j].l_stat) {
+          case LSONPROC: proc->state = 'P'; break;
+          case LSRUN:    proc->state = 'R'; break;
+          case LSSLEEP:  proc->state = 'S'; break;
+          case LSSTOP:   proc->state = 'T'; break;
+          default:       proc->state = '?';
+          }
+        }
+        break;
+      case SSTOP:    proc->state = 'T'; break;
+      case SZOMB:    proc->state = 'Z'; break;
+      case SDEAD:    proc->state = 'D'; break;
+      default:       proc->state = '?';
       }
 
       if (Process_isKernelThread(proc)) {
