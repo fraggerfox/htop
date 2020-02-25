@@ -127,7 +127,7 @@ static inline void NetBSDProcessList_scanMemoryInfo(ProcessList* pl) {
    // These calculations have been taken from sys/miscfs/procfs
    // They need review for testing the correctness
    pl->freeMem = uvmexp.free * PAGE_SIZE_KB;
-   pl->buffersMem = uvmexp.free * PAGE_SIZE_KB;
+   pl->buffersMem = uvmexp.filepages * PAGE_SIZE_KB;
    pl->cachedMem = (uvmexp.anonpages + uvmexp.filepages + uvmexp.execpages) * PAGE_SIZE_KB;
    pl->usedMem = (uvmexp.npages - uvmexp.free - uvmexp.paging) * PAGE_SIZE_KB + pl->buffersMem + pl->cachedMem;
 
