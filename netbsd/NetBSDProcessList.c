@@ -257,15 +257,19 @@ void ProcessList_goThroughEntries(ProcessList* this) {
       case SIDL:     proc->state = 'I'; break;
       case SACTIVE:
 	// We only consider the first LWP with a one of the below states.
-        for(j = 0; j < nlwps; j++) {
-          switch (klwps[j].l_stat) {
-          case LSONPROC: proc->state = 'P'; break;
-          case LSRUN:    proc->state = 'R'; break;
-          case LSSLEEP:  proc->state = 'S'; break;
-          case LSSTOP:   proc->state = 'T'; break;
-          default:       proc->state = '?';
-          }
-        }
+        for (j = 0; j < nlwps; j++) {
+          if (klwps) {
+            switch (klwps[j].l_stat) {
+            case LSONPROC: proc->state = 'P'; break;
+            case LSRUN:    proc->state = 'R'; break;
+            case LSSLEEP:  proc->state = 'S'; break;
+            case LSSTOP:   proc->state = 'T'; break;
+            default:       proc->state = '?';
+            }
+            if (proc->state != '?')
+            break;
+	  }
+	}
         break;
       case SSTOP:    proc->state = 'T'; break;
       case SZOMB:    proc->state = 'Z'; break;
